@@ -11,3 +11,4 @@
 {"date": "2026-10-02", "event": "layout.revised", "changes": ["header title search", "primary feed", "real-activity popular threads", "coffee mug SVG logo", "database rationale in HLD"], "app_tests": 14, "repository_tests": 105, "deployed": false, "human_approval": null}
 {"date":"2026-10-02","event":"layout.simplified","changes":["single header posting action","removed Feed heading","removed popular sidebar"]}
 {"date":"2026-10-02","event":"deployment.rebuild_requested","reason":"activate production database environment variables","deployed":false,"human_approval":true}
+{"date":"2026-10-02","event":"deployment.verified","url":"https://abuse-your-manager.vercel.app","database":"postgresql","checks":["health","public feed","title search","signup","write gate","vote cleanup","logout"],"app_tests":16,"test_content_published":false,"human_approval":true}

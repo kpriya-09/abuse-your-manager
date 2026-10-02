@@ -27,3 +27,6 @@ Latest layout correction: the supplied reference replaces the separate Search ta
 
 
 Owner simplified the layout: remove the public Account button, visible Feed heading and Popular threads sidebar. Let it out is the sole header action and authenticates when needed. Signed-in account/sign-out access remains in the footer. The reading column is centered; header title search remains. This supersedes the preceding sidebar design.
+
+
+Production verification correction: SQLite's row object accepts positional access, while psycopg's configured `dict_row` does not. The feed and authentication rate limiter therefore failed only on PostgreSQL. Use named-column access in shared database paths and add a real PostgreSQL integration test before the next schema-sensitive release. A graceful health response also made a missing Vercel environment variable diagnosable without crashing the entire function.

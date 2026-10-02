@@ -2,6 +2,12 @@
 
 Date: 2026-10-02. These are observed local results, not production guarantees.
 
+## Production deployment verification
+
+Verified `https://abuse-your-manager.vercel.app` against managed PostgreSQL on 2026-10-02. `/api/health` returned `200` with `{"database":"postgresql","ok":true}` and `/api/feed` returned `200` with all five labeled examples. Browser verification confirmed public reading, partial-title search for `MEET`, signup with a disposable private login, write authentication opening the composer, vote/unvote persistence, and logout. The verification vote was removed; no post or reply was published. Browser errors were empty. One signed-out disposable account remains because self-service account deletion is not implemented.
+
+Production uncovered two SQLite/PostgreSQL compatibility defects in the rate limiter: an ambiguous upsert expression and positional access on dictionary-shaped PostgreSQL rows. Both were corrected and the 16 local app tests pass after the fixes.
+
 ## Header search and popular threads revision
 
 Supersedes the dedicated Search tab layout below. Verified broad header search, immediate feed, removal of the decorative path/heading, and the coffee-mug SVG logo at 1440 x 1000 and 390 x 844. Partial-title query `MEET` returns the matching thread; Back to feed restores all five examples. Popular-thread links open the public detail dialog. Mobile has no horizontal overflow, and browser errors were empty. Screenshots refreshed.
