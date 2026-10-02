@@ -77,6 +77,8 @@ The owner then selected a dark treatment and removed the vertical accent rails. 
 
 Primary text is intentionally warm stone rather than white to reduce glare. The logo URL is versioned when its palette changes because browsers retained the earlier green SVG despite the asset contents being replaced.
 
+The dark background uses layered CSS grain, faint scanlines, and low-opacity vermilion/stone blooms. It avoids a downloaded texture asset and keeps the pattern fixed behind the reading surface.
+
 ## Google sign-in loading feedback
 
 Google Identity Services remains an optional client-side dependency. The account dialog now shows an explicit loading state, stops waiting after eight seconds, explains that the script may be blocked, and offers a retry while retaining private login. This does not bypass browser privacy controls or content blockers.

@@ -218,7 +218,26 @@ body.modal-open { overflow: hidden; }
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 /* Dark editorial grid: oversized type with vermilion accents and no side rails. */
-body { background-color: var(--background); background-image: radial-gradient(#eee9df0b .7px, transparent .7px); background-size: 4px 4px; }
+body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(circle at 18% 12%, #f05a320b, transparent 28%),
+    radial-gradient(circle at 82% 74%, #c9c2b708, transparent 32%),
+    repeating-linear-gradient(0deg, #ffffff06 0, #ffffff06 1px, transparent 1px, transparent 4px),
+    radial-gradient(#c9c2b714 .65px, transparent .8px);
+  background-size: auto, auto, auto, 5px 5px;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .28;
+  background-image:
+    repeating-linear-gradient(113deg, transparent 0, transparent 17px, #f05a3208 18px),
+    repeating-linear-gradient(23deg, transparent 0, transparent 29px, #c9c2b706 30px);
+}
 .site-header { background: #0d0d0bf2; border-color: var(--line); box-shadow: none; }
 .brand strong, .brand-mark, .search-prompt, .avatar, .alias, .footer-brand,
 .view-tabs button[aria-selected=true], #active-filter button, #search-active-filter button,

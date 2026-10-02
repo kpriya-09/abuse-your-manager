@@ -19,3 +19,4 @@
 {"date":"2026-10-02","event":"theme.darkened","changes":["charcoal editorial surfaces","matching vermilion mascot","removed vertical side rails"],"human_approval":true}
 {"date":"2026-10-02","event":"google_auth.investigated","evidence":["provider enabled","postgresql healthy","Google account chooser opened","no browser errors"],"changes":["visible loading state","eight-second timeout","retry action","private-login fallback"],"human_approval":true}
 {"date":"2026-10-02","event":"contrast.refined","changes":["warm-stone primary text","dimmed secondary copy","muted button shadow","cache-busted vermilion logo"],"human_approval":true}
+{"date":"2026-10-02","event":"background.textured","changes":["layered CSS grain","faint scanlines","low-opacity vermilion and stone blooms"],"human_approval":true}
