@@ -64,3 +64,7 @@ The composer dialog now uses the mobile viewport width explicitly and permits ev
 ## Optimistic votes and replies
 
 Votes and replies update the in-memory post cache and existing DOM immediately. The client sends the PostgreSQL mutation in the background without refetching the feed or thread. Failed writes roll the optimistic state back; failed replies also restore the draft. This keeps the interface responsive while preserving the database as the source of truth. The client does not maintain an offline write queue, so a failed request is never presented as permanently saved.
+
+## Full terminal palette
+
+The earlier muted olive treatment is superseded. The active UI now uses near-black surfaces, phosphor green text and borders, square controls, and a subtle scanline texture. Amber is reserved for errors, pending state, and the mascot's tie. IBM Plex Mono and the existing reading layout remain.
