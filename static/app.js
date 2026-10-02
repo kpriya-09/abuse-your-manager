@@ -23,7 +23,7 @@ function setView(view) {
   return loadPosts();
 }
 function metadata(post) { return `<div class="post-meta"><span class="avatar" aria-hidden="true">~</span><span class="alias">${escapeHTML(post.alias)}</span><span class="post-time">${age(post.created_at)}</span>${post.demo ? '<span class="example">example</span>' : ''}</div>`; }
-function actions(post, detail = false) { return `<div class="post-actions"><button class="vote" data-vote="${post.id}" aria-pressed="${post.voted}" aria-label="Same here: ${post.votes} votes">↑ &nbsp;${post.votes} <span>· Same here</span></button>${detail ? '' : `<a href="/post/${post.id}" data-post="${post.id}">◯ &nbsp;${post.comments} replies</a>`}<button class="share" data-share="${post.id}">↗ Share</button>${detail ? `<button data-report="${post.id}">Report</button>` : ''}</div>`; }
+function actions(post, detail = false) { return `<div class="post-actions"><button class="vote" data-vote="${post.id}" aria-pressed="${post.voted}" aria-label="Same here: ${post.votes} votes">↑ &nbsp;${post.votes} <span>· Same here</span></button>${detail ? '' : `<a href="/post/${post.id}" data-post="${post.id}" data-comment-count="${post.id}">◯ &nbsp;${post.comments} replies</a>`}<button class="share" data-share="${post.id}">↗ Share</button>${detail ? `<button data-report="${post.id}">Report</button>` : ''}</div>`; }
 function renderPosts() {
   listing('posts').innerHTML = state.posts.length ? state.posts.map(post => `<article class="post" data-id="${post.id}">${metadata(post)}<h2><a href="/post/${post.id}" data-post="${post.id}">${escapeHTML(post.title)}</a></h2><p class="post-excerpt">${escapeHTML(post.body)}</p>${actions(post)}</article>`).join('') : `<div class="empty"><h2>${state.view === 'search' ? 'No matching titles.' : 'A rare moment of silence.'}</h2><p>${state.view === 'search' ? 'Try a different title fragment.' : 'The first story could be yours.'}</p><button class="button" data-action="compose">Tell your story ↗</button></div>`;
 }
@@ -140,6 +140,25 @@ function showCompose() {
 }
 let detailPost = null;
 let detailRequest = 0;
+function cachedPost(id) { return state.posts.find(post => post.id === id); }
+function updateVoteUI(id, voted, votes) {
+  const cached = cachedPost(id);
+  if (cached) { cached.voted = voted; cached.votes = votes; }
+  if (detailPost?.id === id) { detailPost.voted = voted; detailPost.votes = votes; }
+  document.querySelectorAll(`[data-vote="${id}"]`).forEach(button => {
+    button.setAttribute('aria-pressed', String(voted));
+    button.setAttribute('aria-label', `Same here: ${votes} votes`);
+    button.innerHTML = `↑ &nbsp;${votes} <span>· Same here</span>`;
+  });
+}
+function updateCommentCount(id, comments) {
+  const cached = cachedPost(id);
+  if (cached) cached.comments = comments;
+  if (detailPost?.id === id) detailPost.comments = comments;
+  document.querySelectorAll(`[data-comment-count="${id}"]`).forEach(link => { link.innerHTML = `◯ &nbsp;${comments} replies`; });
+  const detailCount = $('.thread-divider span', modal);
+  if (detailPost?.id === id && detailCount) detailCount.textContent = `(${comments})`;
+}
 async function showPost(id, push = true) {
   const requestId = ++detailRequest;
   openModal('<h2 id="modal-title">Pulling up the story…</h2>');
@@ -151,9 +170,23 @@ async function showPost(id, push = true) {
     openModal(`${metadata(result.post)}<h2 id="modal-title">${escapeHTML(result.post.title)}</h2><p class="modal-post-body">${escapeHTML(result.post.body)}</p>${actions(result.post, true)}<div class="thread-divider">The replies <span>(${result.post.comments})</span></div><div id="comments">${result.comments.length ? result.comments.map(comment => `<article class="comment"><span class="alias">${escapeHTML(comment.alias)}</span><p>${escapeHTML(comment.body)}</p></article>`).join('') : '<p class="comment-empty">First chair is open. Add your two cents.</p>'}</div>${state.user ? '<form id="comment-form"><label>Your reply<textarea name="body" required minlength="2" maxlength="2000" placeholder="A little solidarity goes a long way."></textarea></label><p class="form-error" role="alert"></p><button type="submit" class="button">Add my two cents ↗</button></form>' : `<button class="button" data-join="${id}">Sign in to reply ↗</button>`}`);
     const form = $('#comment-form');
     if (form) form.addEventListener('submit', async event => {
-      event.preventDefault(); const button = $('button', form); button.disabled = true;
-      try { await api('/posts/' + id + '/comments', Object.fromEntries(new FormData(form))); await showPost(id, false); await loadPosts(); }
-      catch (error) { $('.form-error', form).textContent = error.message; }
+      event.preventDefault(); const button = $('button', form); const body = new FormData(form).get('body').trim();
+      if (!body) return;
+      button.disabled = true; $('.form-error', form).textContent = '';
+      const comments = $('#comments', modal); $('.comment-empty', comments)?.remove();
+      const pending = document.createElement('article'); pending.className = 'comment pending-comment';
+      pending.innerHTML = `<span class="alias">${escapeHTML(state.user.alias)}</span><p>${escapeHTML(body)}</p><small class="comment-status">Sending…</small>`;
+      comments.appendChild(pending); form.reset(); updateCommentCount(id, (detailPost?.comments || 0) + 1);
+      try {
+        const result = await api('/posts/' + id + '/comments', {body});
+        pending.classList.remove('pending-comment'); $('.comment-status', pending)?.remove();
+        if (result.comment?.id) pending.dataset.id = result.comment.id;
+      }
+      catch (error) {
+        pending.remove(); updateCommentCount(id, Math.max(0, (detailPost?.comments || 1) - 1));
+        if (!comments.children.length) comments.innerHTML = '<p class="comment-empty">First chair is open. Add your two cents.</p>';
+        $('[name="body"]', form).value = body; $('.form-error', form).textContent = error.message;
+      }
       finally { button.disabled = false; }
     });
     $('.modal-close').focus();
@@ -178,10 +211,15 @@ document.addEventListener('click', async event => {
   if (data.report) requireAuth(() => showReport(Number(data.report)));
   if (data.share) { const url = location.origin + '/post/' + data.share; try { await navigator.clipboard.writeText(url); toast('Story link copied.'); } catch { openModal(`<h2 id="modal-title">Pass it around.</h2><label>Story link<input readonly value="${escapeHTML(url)}"></label>`); $('input', modal).select(); } }
   if (data.vote) requireAuth(async () => {
-    target.disabled = true;
-    try { await api('/posts/' + data.vote + '/vote', {voted: target.getAttribute('aria-pressed') !== 'true'}); if (modal.open && detailPost?.id === Number(data.vote)) await showPost(Number(data.vote), false); else if (modal.open) closeModal(); await loadPosts(); }
-    catch (error) { toast(error.message); }
-    finally { target.disabled = false; }
+    const id = Number(data.vote); const desired = target.getAttribute('aria-pressed') !== 'true';
+    const post = detailPost?.id === id ? detailPost : cachedPost(id);
+    const previous = {voted: post?.voted ?? !desired, votes: post?.votes ?? Number(target.getAttribute('aria-label')?.match(/\d+/)?.[0] || 0)};
+    const nextVotes = Math.max(0, previous.votes + (desired ? 1 : -1));
+    const buttons = [...document.querySelectorAll(`[data-vote="${id}"]`)]; buttons.forEach(button => { button.disabled = true; });
+    updateVoteUI(id, desired, nextVotes);
+    try { const result = await api('/posts/' + id + '/vote', {voted: desired}); if (result.voted !== desired) updateVoteUI(id, result.voted, previous.votes); }
+    catch (error) { updateVoteUI(id, previous.voted, previous.votes); toast(error.message); }
+    finally { buttons.forEach(button => { button.disabled = false; }); }
   });
 });
 $('#load-more').addEventListener('click', () => {

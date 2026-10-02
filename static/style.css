@@ -119,6 +119,8 @@ dialog textarea { min-height: 150px; resize: vertical; line-height: 1.8; }
 .comment { padding: 15px 0; border-bottom: 1px solid var(--line); }
 .comment p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 8px 0 0; }
 .comment .alias { font-size: 11px; }
+.pending-comment { opacity: .62; }
+.comment-status { display: block; margin-top: 8px; color: var(--muted); }
 #comment-form textarea { min-height: 85px; }
 .rules-list { padding-left: 20px; font-size: 12px; line-height: 1.9; color: #a5ad9d; }
 .rules-list li { padding: 8px 0; }

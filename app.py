@@ -373,10 +373,12 @@ def create_app(test_config=None):
         content_check(body)
         if limited('comment:' + str(g.user['id']), 30, 3600):
             return fail('Take a breather and try again in an hour.', 429)
-        db().execute('INSERT INTO comments(post_id,user_id,body,created_at) VALUES (?,?,?,?)',
-                     (pid, g.user['id'], body, int(time.time())))
+        created_at = int(time.time())
+        comment_id = db().insert_id('INSERT INTO comments(post_id,user_id,body,created_at) VALUES (?,?,?,?)',
+                                    (pid, g.user['id'], body, created_at))
         db().commit()
-        return jsonify(ok=True), 201
+        return jsonify(comment={'id': comment_id, 'body': body, 'created_at': created_at,
+                                'alias': g.user['alias']}), 201
 
     @app.post('/api/posts/<int:pid>/vote')
     @authenticated

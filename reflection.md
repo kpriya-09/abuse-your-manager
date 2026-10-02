@@ -33,3 +33,5 @@ Production verification correction: SQLite's row object accepts positional acces
 
 
 Mobile correction: `max-width` on the dialog did not prevent intrinsic grid/input sizing from overflowing on the user's iPhone. Explicit viewport width plus `min-width: 0` on the modal's grid descendants fixed the clipped right edge. Screenshot verification at 390 × 844 showed the full composer, textarea, note, and submit button within the dialog.
+
+Interaction correction: successful vote and reply mutations refetched and rebuilt the full feed or thread, creating reload-like flicker. Small mutations should update the local cache and affected controls immediately, persist asynchronously, and roll back on failure. Browser verification should assert DOM node identity, not only the final count.

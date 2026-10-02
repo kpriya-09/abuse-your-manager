@@ -32,6 +32,8 @@ Verified Feed is selected on initial load and the search field is absent from it
 
 ### Subsequent terminal-style revision
 
+Optimistic interaction verification: **17 app tests passed** and `node --check static/app.js` passed. In a real browser, voting preserved the exact feed post DOM node while changing its count, and replying preserved the exact open-thread DOM node while adding the reply and incrementing the count. The browser console and page-error checks were empty.
+
 Replaced the visual theme and font with warm charcoal, muted olive and locally hosted IBM Plex Mono. Visually inspected 1440 x 1000 desktop, 390 x 844 mobile, and the mobile signup dialog. Mobile overflow check returned false; `MEET` still selected the matching story; the posting CTA opened the signup gate. No browser page errors were reported. JavaScript syntax check, 105 repository tests and all six learning validations passed. This revision did not change the API. The eight app tests from the previous revision remain the latest backend test run.
 
 After the owner's design/search correction, **8 app tests passed**, JavaScript syntax validation passed, and all **105 repository tests** plus all six learning-directory validations passed again. Browser search for `MEET` returned the title containing `meeting`; searching `spreadsheets`, present only in a story body, returned the empty state. The intro, topic sidebar, category badges and composer category field were removed. Desktop and mobile previews were refreshed with the tonal palette. These results supersede the earlier UI-specific checks below; earlier lifecycle checks are retained as history.

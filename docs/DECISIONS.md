@@ -60,3 +60,7 @@ Owner simplified the layout: remove the public Account button, visible Feed head
 ## Mobile composer and optional Google sign-in
 
 The composer dialog now uses the mobile viewport width explicitly and permits every grid/form child to shrink, preventing intrinsic input width from pushing the dialog beyond an iPhone viewport. Google Identity Services is an optional sign-in path; server-side ID-token verification uses the configured web client ID, stores no Google profile fields, and maps the stable Google subject to the existing random-alias/session model. Private login remains available. The Google script is loaded only after the account dialog opens and only when `GOOGLE_CLIENT_ID` is configured.
+
+## Optimistic votes and replies
+
+Votes and replies update the in-memory post cache and existing DOM immediately. The client sends the PostgreSQL mutation in the background without refetching the feed or thread. Failed writes roll the optimistic state back; failed replies also restore the draft. This keeps the interface responsive while preserving the database as the source of truth. The client does not maintain an offline write queue, so a failed request is never presented as permanently saved.

@@ -109,14 +109,19 @@ class AppTests(unittest.TestCase):
         self.assertEqual(self.client.get('/api/posts?offset=nope').status_code, 400)
 
     def test_votes_comments_reports_and_moderation(self):
-        self.signup()
+        alias = self.signup()
         pid = self.post()
         for _ in range(2):
             self.assertEqual(self.write(f'/posts/{pid}/vote', {'voted':True}).status_code, 200)
         self.assertEqual(self.client.get(f'/api/posts/{pid}').json['post']['votes'], 1)
         self.write(f'/posts/{pid}/vote', {'voted':False})
         self.assertEqual(self.client.get(f'/api/posts/{pid}').json['post']['votes'], 0)
-        self.assertEqual(self.write(f'/posts/{pid}/comments', {'body':'That sounds exhausting.'}).status_code, 201)
+        reply = self.write(f'/posts/{pid}/comments', {'body':'That sounds exhausting.'})
+        self.assertEqual(reply.status_code, 201)
+        self.assertEqual(reply.json['comment']['body'], 'That sounds exhausting.')
+        self.assertEqual(reply.json['comment']['alias'], alias)
+        self.assertIsInstance(reply.json['comment']['id'], int)
+        self.assertNotIn('user_id', reply.json['comment'])
         self.assertEqual(self.client.get(f'/api/posts/{pid}').json['post']['comments'], 1)
         self.write(f'/posts/{pid}/report', {'reason':'Private information'})
         self.write(f'/posts/{pid}/report', {'reason':'Private information'})
