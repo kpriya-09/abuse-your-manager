@@ -72,3 +72,5 @@ The earlier muted olive treatment is superseded. The active UI now uses near-bla
 ## Editorial grid revision
 
 The phosphor terminal palette is superseded by the owner's grid-system reference. The interface now uses warm paper texture, black display headlines, vermilion structural lines, staggered feed blocks, and hard-edged controls. IBM Plex Mono remains for metadata and body copy, while headings use a heavy system sans face. The reference's blue was intentionally replaced with vermilion.
+
+The owner then selected a dark treatment and removed the vertical accent rails. The active version uses charcoal surfaces, off-white display type, restrained vermilion actions and metadata, and a matching dark mascot. Staggered desktop blocks and the editorial type hierarchy remain.

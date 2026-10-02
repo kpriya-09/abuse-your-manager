@@ -39,3 +39,5 @@ Interaction correction: successful vote and reply mutations refetched and rebuil
 Visual correction: muted olive still read as pastel despite terminal typography. A CLI direction needs the palette, surface treatment, control geometry, and status colors to agree. The accepted working direction is near-black with phosphor green; use amber sparingly for state.
 
 Reference-led revision: the owner preferred an editorial grid-system example after seeing the full CLI palette. Preserve the reference's hierarchy and structural rhythm rather than its exact color; warm paper, black type, and vermilion provide an original expression. Treat the earlier terminal palette as superseded.
+
+Dark-theme correction: retain the reference's grid rhythm without literal vertical guide rails. Use vermilion as a controlled interaction and identity accent, rather than persistent lines framing the reading column.

@@ -38,6 +38,8 @@ Full terminal palette verification: inspected the feed at **1440 × 1000** and *
 
 Editorial grid verification: inspected the revised warm-paper/vermilion feed at **1440 × 1000** and **390 × 844**. The staggered desktop grid collapses cleanly on mobile, the feed remains primary, and the mobile document has no horizontal overflow or browser errors.
 
+Dark grid verification: inspected the charcoal/vermilion revision at **1440 × 1000** and **390 × 844**. The logo matches the interface, the page and post side rails are absent, and the mobile document has no horizontal overflow or browser errors.
+
 Replaced the visual theme and font with warm charcoal, muted olive and locally hosted IBM Plex Mono. Visually inspected 1440 x 1000 desktop, 390 x 844 mobile, and the mobile signup dialog. Mobile overflow check returned false; `MEET` still selected the matching story; the posting CTA opened the signup gate. No browser page errors were reported. JavaScript syntax check, 105 repository tests and all six learning validations passed. This revision did not change the API. The eight app tests from the previous revision remain the latest backend test run.
 
 After the owner's design/search correction, **8 app tests passed**, JavaScript syntax validation passed, and all **105 repository tests** plus all six learning-directory validations passed again. Browser search for `MEET` returned the title containing `meeting`; searching `spreadsheets`, present only in a story body, returned the empty state. The intro, topic sidebar, category badges and composer category field were removed. Desktop and mobile previews were refreshed with the tonal palette. These results supersede the earlier UI-specific checks below; earlier lifecycle checks are retained as history.
