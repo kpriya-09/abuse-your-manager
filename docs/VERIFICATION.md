@@ -40,6 +40,8 @@ Editorial grid verification: inspected the revised warm-paper/vermilion feed at 
 
 Dark grid verification: inspected the charcoal/vermilion revision at **1440 × 1000** and **390 × 844**. The logo matches the interface, the page and post side rails are absent, and the mobile document has no horizontal overflow or browser errors.
 
+Contrast refinement: verified warm-stone headline and body colors at **1440 × 820** and confirmed the header requests the cache-busted vermilion logo URL (`favicon.svg?v=4`).
+
 Google sign-in production investigation: `/api/auth/providers` returned an enabled Google client, `/api/health` returned healthy PostgreSQL, and a clean mobile browser rendered the Google iframe. Clicking it opened Google's account chooser for `abuseyourmanager.com`; the console and page-error checks were empty. Added visible loading, timeout, retry, and fallback copy for blocked or slow client scripts.
 
 Replaced the visual theme and font with warm charcoal, muted olive and locally hosted IBM Plex Mono. Visually inspected 1440 x 1000 desktop, 390 x 844 mobile, and the mobile signup dialog. Mobile overflow check returned false; `MEET` still selected the matching story; the posting CTA opened the signup gate. No browser page errors were reported. JavaScript syntax check, 105 repository tests and all six learning validations passed. This revision did not change the API. The eight app tests from the previous revision remain the latest backend test run.

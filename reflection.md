@@ -43,3 +43,5 @@ Reference-led revision: the owner preferred an editorial grid-system example aft
 Dark-theme correction: retain the reference's grid rhythm without literal vertical guide rails. Use vermilion as a controlled interaction and identity accent, rather than persistent lines framing the reading column.
 
 Auth feedback correction: a third-party sign-in script can be healthy in production yet look broken while loading or when a device blocks it. Always expose the loading state, bound the wait, name the likely failure, and preserve a first-party fallback.
+
+Asset-cache correction: replacing an SVG at the same path does not guarantee that existing browsers display the new palette. Version visual assets in their URLs when an immediate brand-color change matters.
