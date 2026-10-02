@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1c1f1d">
+  <meta name="description" content="The unofficial office watercooler. Read workplace stories, let off steam, and find your people under a made-up name.">
+  <title>Abuse Your Manager</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#feed">Skip to stories</a>
+<header class="site-header">
+  <a class="brand" href="/" aria-label="Abuse Your Manager home"><img class="brand-logo" src="/static/favicon.svg" alt="" width="52" height="52"><span>abuse your<br><strong>manager.</strong></span></a>
+  <form id="header-search" class="header-search" role="search"><label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="search" type="search" placeholder="Search threads" aria-label="Search titles" maxlength="120" autocomplete="off"></label></form>
+  <div class="account"><button class="button dark header-post" data-action="compose">Let it out <span>↗</span></button></div>
+</header>
+<main class="community-layout">
+  <section class="breakroom" id="feed" aria-label="Stories">
+    <div id="feed-panel">
+      <div id="active-filter" hidden></div><div id="posts" aria-live="polite"><div class="empty">Pulling up a chair…</div></div><button id="load-more" class="button outline" hidden>More from the break room ↓</button>
+    </div>
+    <div id="search-panel" hidden>
+      <div id="search-active-filter" hidden></div><div id="search-posts" aria-live="polite"><div class="empty"><h2>Something on your mind?</h2><p>Enter part of a title to find a story.</p></div></div><button id="search-load-more" class="button outline" hidden>More matching stories ↓</button>
+    </div>
+    <p class="demo-note">Opening edition. Stories marked “Example” are fictional. Votes and replies are real.</p>
+  </section>
+</main>
+<footer><button id="auth-button" class="text-button" data-action="auth" hidden>Account</button><a class="footer-brand" href="/">:q work</a><button class="text-button" data-action="rules">House rules</button><button class="text-button" data-action="privacy">Privacy & anonymity ↗</button></footer>
+<dialog id="modal" aria-labelledby="modal-title"><button class="modal-close" aria-label="Close dialog">×</button><div id="modal-content"></div></dialog>
+<div id="toast" role="status" hidden></div>
+</body>
+</html>
