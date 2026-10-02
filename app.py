@@ -12,6 +12,8 @@ import time
 from flask import Flask, g, jsonify, request, send_from_directory
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import check_password_hash, generate_password_hash
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
 from feed import rank_candidates, POLICY_VERSION, CANDIDATE_LIMIT, PAGE_SIZE, SNAPSHOT_TTL
 from database import Database
 
@@ -25,7 +27,8 @@ def create_app(test_config=None):
     app.config.update(DATABASE=None if production_without_database else
                       os.getenv('DATABASE_URL', str(ROOT / 'instance' / 'aym.sqlite3')),
                       MAX_CONTENT_LENGTH=20_000, SECURE_COOKIES=os.getenv('AYM_HTTPS') == '1',
-                      SEED_DEMO=os.getenv('AYM_SEED_DEMO', '1') == '1')
+                      SEED_DEMO=os.getenv('AYM_SEED_DEMO', '1') == '1',
+                      GOOGLE_CLIENT_ID=os.getenv('GOOGLE_CLIENT_ID', ''))
     if test_config:
         app.config.update(test_config)
     if app.config['DATABASE'] and not app.config['DATABASE'].startswith(('postgres://', 'postgresql://')):
@@ -87,7 +90,7 @@ def create_app(test_config=None):
 
     @app.after_request
     def headers(response):
-        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; style-src 'self' https://accounts.google.com/gsi/style; font-src 'self'; img-src 'self' data:; connect-src 'self' https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Referrer-Policy'] = 'no-referrer'
         response.headers['X-Frame-Options'] = 'DENY'
@@ -182,6 +185,51 @@ def create_app(test_config=None):
         if not user or not matched:
             return fail('Login or password is incorrect.', 401)
         return new_session(user['id'], user['alias'])
+
+    @app.get('/api/auth/providers')
+    def auth_providers():
+        client_id = app.config['GOOGLE_CLIENT_ID']
+        return jsonify(google={'enabled': bool(client_id), 'client_id': client_id or None})
+
+    @app.post('/api/auth/google')
+    def google_auth():
+        client_id = app.config['GOOGLE_CLIENT_ID']
+        if not client_id:
+            return fail('Google sign-in is not configured.', 503)
+        if limited('google-auth:' + (request.remote_addr or ''), 20, 900):
+            return fail('Too many attempts. Try again in 15 minutes.', 429)
+        credential = data().get('credential')
+        if not isinstance(credential, str) or not 100 <= len(credential) <= 10_000:
+            return fail('Google sign-in could not be verified.')
+        try:
+            claims = google_id_token.verify_oauth2_token(
+                credential, google_requests.Request(), client_id)
+        except (ValueError, TypeError):
+            return fail('Google sign-in could not be verified.', 401)
+        subject = claims.get('sub')
+        if not isinstance(subject, str) or not subject:
+            return fail('Google sign-in could not be verified.', 401)
+        # Google profile fields are deliberately not stored. Only the stable subject
+        # becomes a one-way internal key; the public continues to see a random alias.
+        login = 'google-' + sha256(subject.encode()).hexdigest()[:32]
+        user = db().execute('SELECT id,alias FROM users WHERE login=?', (login,)).fetchone()
+        if not user:
+            alias = secrets.choice(['Feral', 'Overcaffeinated', 'Quiet', 'Corporate', 'Unmuted', 'OutOfOffice']) + secrets.choice(['Stapler', 'Pigeon', 'Potato', 'Raccoon', 'Paperclip', 'Toast']) + '_' + secrets.token_hex(3)
+            try:
+                uid = db().insert_id('INSERT INTO users(login,password_hash,alias,created_at) VALUES (?,?,?,?)',
+                                     (login, generate_password_hash(secrets.token_urlsafe(48)), alias, int(time.time())))
+                db().commit()
+            except Exception as error:
+                db().rollback()
+                if 'unique' not in str(error).lower() and 'duplicate' not in str(error).lower():
+                    raise
+                user = db().execute('SELECT id,alias FROM users WHERE login=?', (login,)).fetchone()
+                if not user:
+                    raise
+                uid, alias = user['id'], user['alias']
+        else:
+            uid, alias = user['id'], user['alias']
+        return new_session(uid, alias)
 
     @app.post('/api/logout')
     def logout():

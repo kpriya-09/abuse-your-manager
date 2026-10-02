@@ -56,3 +56,7 @@ Popular threads ranks visible posts by votes plus distinct repliers, with recenc
 
 
 Owner simplified the layout: remove the public Account button, visible Feed heading and Popular threads sidebar. Let it out is the sole header action and authenticates when needed. Signed-in account/sign-out access remains in the footer. The reading column is centered; header title search remains. This supersedes the preceding sidebar design.
+
+## Mobile composer and optional Google sign-in
+
+The composer dialog now uses the mobile viewport width explicitly and permits every grid/form child to shrink, preventing intrinsic input width from pushing the dialog beyond an iPhone viewport. Google Identity Services is an optional sign-in path; server-side ID-token verification uses the configured web client ID, stores no Google profile fields, and maps the stable Google subject to the existing random-alias/session model. Private login remains available. The Google script is loaded only after the account dialog opens and only when `GOOGLE_CLIENT_ID` is configured.

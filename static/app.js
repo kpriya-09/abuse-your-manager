@@ -80,9 +80,45 @@ modal.addEventListener('close', () => { document.body.classList.remove('modal-op
 $('.modal-close').addEventListener('click', closeModal);
 modal.addEventListener('click', event => { if (event.target === modal) { const r = modal.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) closeModal(); } });
 function requireAuth(action) { if (state.user) action(); else { state.pending = action; showAuth(); } }
+let authProviders;
+let googleScript;
+function loadGoogleScript() {
+  if (window.google?.accounts?.id) return Promise.resolve();
+  if (googleScript) return googleScript;
+  googleScript = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client'; script.async = true;
+    script.onload = resolve; script.onerror = () => reject(new Error('Google sign-in did not load.'));
+    document.head.appendChild(script);
+  });
+  return googleScript;
+}
+async function setupGoogleAuth() {
+  const mount = $('#google-signin', modal);
+  if (!mount) return;
+  try {
+    authProviders ||= await api('/auth/providers');
+    if (!authProviders.google.enabled) { mount.hidden = true; $('.auth-divider', modal).hidden = true; return; }
+    await loadGoogleScript();
+    for (let i = 0; i < 20 && !window.google?.accounts?.id; i++) await new Promise(resolve => setTimeout(resolve, 100));
+    if (!window.google?.accounts?.id) throw new Error('Google sign-in did not load.');
+    google.accounts.id.initialize({client_id: authProviders.google.client_id, callback: handleGoogleCredential});
+    google.accounts.id.renderButton(mount, {theme: 'outline', size: 'large', shape: 'rectangular', width: Math.min(360, mount.clientWidth)});
+  } catch (error) { mount.innerHTML = `<span class="google-unavailable">${escapeHTML(error.message)}</span>`; }
+}
+async function handleGoogleCredential(result) {
+  const errorBox = $('.form-error', modal);
+  try {
+    const auth = await api('/auth/google', {credential: result.credential});
+    state.user = auth.user; updateAccount(); const pending = state.pending; state.pending = null;
+    if (pending) pending(); else closeModal();
+    toast(`You’re ${state.user.alias}. Welcome to the break room.`); await loadPosts();
+  } catch (error) { if (errorBox) errorBox.textContent = error.message; }
+}
 function showAuth(mode = 'signup') {
   const signup = mode === 'signup';
-  openModal(`<span class="eyebrow">YOUR NAME STAYS OUT OF IT.</span><h2 id="modal-title">${signup ? 'Clock in. Go incognito.' : 'Back for another break?'}</h2><p>${signup ? 'Pick a private login. We’ll give you a random public alias. No work email. No real name.' : 'Use your private login to pick up where you left off. Your public alias stays the same.'}</p><form id="auth-form"><label>Private login<input name="login" required minlength="3" maxlength="40" autocomplete="username" autocapitalize="none" spellcheck="false" pattern="[A-Za-z0-9_.\-]+" placeholder="Something only you know"></label><label>Password<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="${signup ? 'new-password' : 'current-password'}" placeholder="At least 12 characters"></label><p class="form-note">${signup ? 'Save these credentials. Password recovery is not available in this version.' : 'Private logins are case-insensitive.'}</p><p class="form-error" role="alert"></p><button class="button" type="submit">${signup ? 'Get my anonymous name' : 'Sign in'} <span>↗</span></button></form><button class="switch-auth">${signup ? 'Already have an account? Sign in' : 'New around here? Create an account'}</button>`);
+  openModal(`<span class="eyebrow">YOUR NAME STAYS OUT OF IT.</span><h2 id="modal-title">${signup ? 'Clock in. Go incognito.' : 'Back for another break?'}</h2><p>${signup ? 'Use Google for a quick start, or pick a private login. Either way, the room only sees your random alias.' : 'Use Google or your private login to pick up where you left off.'}</p><div id="google-signin" class="google-signin" aria-label="Google sign in"></div><div class="auth-divider"><span>or use a private login</span></div><form id="auth-form"><label>Private login<input name="login" required minlength="3" maxlength="40" autocomplete="username" autocapitalize="none" spellcheck="false" pattern="[A-Za-z0-9_.\-]+" placeholder="Something only you know"></label><label>Password<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="${signup ? 'new-password' : 'current-password'}" placeholder="At least 12 characters"></label><p class="form-note">${signup ? 'Save these credentials. Password recovery is not available in this version.' : 'Private logins are case-insensitive.'}</p><p class="form-error" role="alert"></p><button class="button" type="submit">${signup ? 'Get my anonymous name' : 'Sign in'} <span>↗</span></button></form><button class="switch-auth">${signup ? 'Already have an account? Sign in' : 'New around here? Create an account'}</button>`);
+  setupGoogleAuth();
   $('.switch-auth', modal).addEventListener('click', () => showAuth(signup ? 'login' : 'signup'));
   $('#auth-form').addEventListener('submit', async event => {
     event.preventDefault(); const form = event.currentTarget; const button = $('button[type=submit]', form); button.disabled = true;
@@ -124,7 +160,7 @@ async function showPost(id, push = true) {
   } catch (error) { if (requestId === detailRequest) openModal(`<h2 id="modal-title">Story unavailable.</h2><p>${escapeHTML(error.message)}</p>`); }
 }
 function showRules() { openModal('<span class="eyebrow">OUR VERY SHORT EMPLOYEE HANDBOOK</span><h2 id="modal-title">Roast the situation.<br>Respect the human.</h2><ol class="rules-list"><li><strong>Keep people unidentifiable.</strong> No real names, company identifiers, contact details or identifying screenshots.</li><li><strong>Tell your own story.</strong> Vent about what happened to you. Don’t invent accusations or rally people against someone.</li><li><strong>No threats or hate.</strong> Frustration belongs here. Threats, slurs and harassment don’t.</li><li><strong>Give people room to vent.</strong> You can disagree without making someone’s day worse.</li><li><strong>See something off?</strong> Open a story and use Report. Reports enter an operator review queue.</li></ol><p>This is a place for workplace stories and solidarity.</p>'); }
-function showPrivacy() { openModal('<span class="eyebrow">ANONYMITY, WITHOUT THE FINE PRINT</span><h2 id="modal-title">An alias. Not a disguise.</h2><p>Your private login and password hash are stored separately from the public story fields. Your randomly assigned alias is visible on every story and reply you write.</p><p>This is pseudonymous, not untraceable: the operator can link an account to its posts. Your writing can identify you, too. Leave out personal and employer details.</p><p>No email is collected. There are no analytics, advertising scripts or third-party font requests. Session cookies keep you signed in for up to seven days. Signing out revokes the current session.</p><p>This local version has no password recovery or self-service account deletion. Reports are stored for manual review; it does not promise continuous moderation.</p>'); }
+function showPrivacy() { openModal('<span class="eyebrow">ANONYMITY, WITHOUT THE FINE PRINT</span><h2 id="modal-title">An alias. Not a disguise.</h2><p>Your private login and password hash are stored separately from the public story fields. If you use Google, we store a one-way internal identifier instead of your Google name, email or profile photo. Your randomly assigned alias is visible on every story and reply you write.</p><p>This is pseudonymous, not untraceable: the operator can link an account to its posts. Google can know you signed into this service. Your writing can identify you, too. Leave out personal and employer details.</p><p>Google Identity Services loads only when the account dialog opens. There are no analytics or advertising scripts. Session cookies keep you signed in for up to seven days. Signing out revokes the current session.</p><p>This version has no self-service account deletion. Reports are stored for manual review; it does not promise continuous moderation.</p>'); }
 function showAccount() { openModal(`<span class="eyebrow">YOUR BREAK ROOM BADGE</span><h2 id="modal-title">${escapeHTML(state.user.alias)}</h2><p>This is how the room sees you. Your private login is never shown on your posts.</p><button class="button" id="logout">Clock out / Sign out ↗</button>`); $('#logout').addEventListener('click', async () => { try { await api('/logout', {}); state.user = null; updateAccount(); closeModal(); await loadPosts(); toast('Signed out. You can still read everything.'); } catch (error) { toast(error.message); } }); }
 function showReport(id) { openModal('<span class="eyebrow">LOOKING OUT FOR THE ROOM</span><h2 id="modal-title">Something not right?</h2><p>Tell us what needs a closer look. Reports are private and queued for manual review.</p><form id="report-form"><label>Reason<select name="reason"><option>Identifying or private information</option><option>Harassment or targeted abuse</option><option>Threats or hateful content</option><option>Spam or misleading content</option></select></label><p class="form-error" role="alert"></p><button class="button" type="submit">Send report ↗</button></form>'); const form = $('#report-form'); form.addEventListener('submit', async event => { event.preventDefault(); const button = $('button', form); button.disabled = true; try { await api('/posts/' + id + '/report', Object.fromEntries(new FormData(form))); closeModal(); toast('Report added to the review queue. Thank you.'); } catch (error) { $('.form-error', form).textContent = error.message; } finally { button.disabled = false; } }); }
 document.addEventListener('click', async event => {

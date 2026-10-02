@@ -30,3 +30,6 @@ Owner simplified the layout: remove the public Account button, visible Feed head
 
 
 Production verification correction: SQLite's row object accepts positional access, while psycopg's configured `dict_row` does not. The feed and authentication rate limiter therefore failed only on PostgreSQL. Use named-column access in shared database paths and add a real PostgreSQL integration test before the next schema-sensitive release. A graceful health response also made a missing Vercel environment variable diagnosable without crashing the entire function.
+
+
+Mobile correction: `max-width` on the dialog did not prevent intrinsic grid/input sizing from overflowing on the user's iPhone. Explicit viewport width plus `min-width: 0` on the modal's grid descendants fixed the clipped right edge. Screenshot verification at 390 × 844 showed the full composer, textarea, note, and submit button within the dialog.

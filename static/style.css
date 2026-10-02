@@ -103,12 +103,17 @@ dialog::backdrop { background: #111610b0; backdrop-filter: blur(3px); }
 dialog h2 { font-size: 25px; font-weight: 500; line-height: 1.4; letter-spacing: -.7px; margin: 17px 0; overflow-wrap: anywhere; }
 dialog p { font-size: 12px; line-height: 1.9; color: #a5ad9d; }
 dialog form { display: grid; gap: 17px; margin-top: 25px; }
+dialog, #modal-content, dialog form, dialog label { min-width: 0; }
 dialog label { display: grid; gap: 8px; font-size: 11px; color: var(--accent); }
-dialog input, dialog textarea, dialog select { width: 100%; border: 1px solid #4d5845; border-radius: 3px; background: #1c211b; color: var(--ink); padding: 13px; font-size: 12px; }
+dialog input, dialog textarea, dialog select { width: 100%; min-width: 0; max-width: 100%; border: 1px solid #4d5845; border-radius: 3px; background: #1c211b; color: var(--ink); padding: 13px; font-size: 12px; }
 dialog textarea { min-height: 150px; resize: vertical; line-height: 1.8; }
 .form-error { color: #dfb3a1 !important; margin: 0; font-size: 12px !important; }
 .form-note { font-size: 10px !important; margin: 0; }
 .switch-auth { color: var(--accent); font-size: 11px; margin-top: 20px; text-decoration: underline; text-underline-offset: 4px; }
+.google-signin { width: 100%; min-height: 44px; margin-top: 22px; display: flex; justify-content: center; overflow: hidden; }
+.google-unavailable { color: var(--muted); font-size: 10px; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 19px 0 -8px; color: var(--muted); font-size: 9px; text-transform: uppercase; }
+.auth-divider::before, .auth-divider::after { content: ''; height: 1px; background: var(--line); flex: 1; }
 .modal-post-body { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px !important; }
 .thread-divider { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 17px; }
 .comment { padding: 15px 0; border-bottom: 1px solid var(--line); }
@@ -186,7 +191,8 @@ body.modal-open { overflow: hidden; }
   .demo-note { font-size: 8px; }
   footer { margin: 0 18px; padding: 20px 0; flex-wrap: wrap; gap: 12px; }
   .footer-brand { font-size: 11px; }
-  dialog { padding: 32px 22px; }
+  dialog { width: calc(100vw - 24px); max-width: none; max-height: calc(100dvh - 24px); margin: auto; padding: 30px 20px 24px; overflow-x: hidden; overscroll-behavior: contain; }
+  dialog form .button { width: 100%; }
   dialog h2 { font-size: 22px; }
 }
 @media(max-width:380px) { .brand-mark { display: none; } .account { gap: 8px; } .site-header { padding: 15px; } }

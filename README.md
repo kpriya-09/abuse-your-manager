@@ -22,6 +22,7 @@ For an existing Python environment: `python -m pip install -r requirements.txt`,
 - Feed opens immediately, with partial-title search in the header. Body text is excluded from search. Read and open shareable stories without signing in.
 - **Let it out** is the only header action and authenticates when needed. Feed ranking is server-owned, versioned and cursor-paginated, with freshness and bounded vote support. Geographic and history-based personalization are planned, not active.
 - Create an account with a private login and a password of 12+ characters. Receive a persistent random alias. No email collected.
+- Optional Google sign-in provides a faster entry while preserving random public aliases; setup is documented in [docs/GOOGLE-AUTH.md](docs/GOOGLE-AUTH.md).
 - Publish stories, reply, add/remove a “same here” vote, and report stories after signing in.
 - SQLite persistence locally and PostgreSQL in production, scrypt password hashes, opaque server-side sessions, write protections and bounded inputs.
 - Five fictional starter stories, visibly labeled Example; no fabricated engagement.

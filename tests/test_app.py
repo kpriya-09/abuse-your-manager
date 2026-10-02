@@ -43,6 +43,28 @@ class AppTests(unittest.TestCase):
         self.assertEqual(health.status_code, 503)
         self.assertEqual(health.json['error'], 'DATABASE_URL is not configured.')
 
+    def test_google_auth_uses_subject_and_preserves_public_alias(self):
+        google_app = create_app({'TESTING': True, 'DATABASE': self.path,
+                                 'SEED_DEMO': False, 'GOOGLE_CLIENT_ID': 'client.example'})
+        browser = google_app.test_client()
+        self.assertTrue(browser.get('/api/auth/providers').json['google']['enabled'])
+        token = 'x' * 200
+        with patch('app.google_id_token.verify_oauth2_token', return_value={
+                'sub': 'stable-google-subject', 'email': 'private@example.com', 'name': 'Private Name'}):
+            first = self.write('/auth/google', {'credential': token}, browser)
+            alias = first.json['user']['alias']
+            self.assertEqual(first.status_code, 200)
+            self.write('/logout', {}, browser)
+            second = self.write('/auth/google', {'credential': token}, browser)
+        self.assertEqual(second.json['user']['alias'], alias)
+        self.assertNotIn('private@example.com', second.text)
+        conn = sqlite3.connect(self.path)
+        try:
+            row = conn.execute("SELECT login FROM users WHERE alias=?", (alias,)).fetchone()
+            self.assertTrue(row[0].startswith('google-'))
+        finally:
+            conn.close()
+
     def test_public_read_authenticated_write_and_private_identity(self):
         with self.client.get('/') as home:
             self.assertEqual(home.status_code, 200)

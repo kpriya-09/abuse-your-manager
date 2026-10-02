@@ -28,6 +28,8 @@ The cylinders are logical groups inside **one database**, not separate services 
 
 **Decision: managed PostgreSQL for production, with SQLite retained for local development.** The application adapter and initial PostgreSQL migration are implemented; cloud provisioning and migration application remain separately verified deployment steps.
 
+Google Identity Services is an optional authentication path. The browser receives a Google ID token and the Flask API verifies its signature, audience, issuer and expiry with Google's official library. Only a one-way internal key derived from Google's stable subject identifier is retained; profile name, email and photo are discarded. Existing private-login accounts remain supported, and both paths receive random public aliases.
+
 | Requirement | Why PostgreSQL fits |
 |---|---|
 | Evolving personalized feed | Accounts, posts, interactions, regional preferences and moderation have explicit relationships. SQL lets us revise candidate joins and aggregation without changing the client contract. This is design judgment based on our data model. |
