@@ -111,6 +111,12 @@ dialog textarea { min-height: 150px; resize: vertical; line-height: 1.8; }
 .form-note { font-size: 10px !important; margin: 0; }
 .switch-auth { color: var(--accent); font-size: 11px; margin-top: 20px; text-decoration: underline; text-underline-offset: 4px; }
 .google-signin { width: 100%; min-height: 44px; margin-top: 22px; display: flex; justify-content: center; overflow: hidden; }
+/* Keep Google's fallback button usable even when its external stylesheet fails. */
+.google-signin > div { max-width: 100%; }
+.google-signin [role="button"] { box-sizing: border-box; display: flex; align-items: center; justify-content: center; min-height: 44px; max-width: 360px; padding: 0 14px; border: 1px solid #747775; border-radius: 4px; background: #fff; color: #1f1f1f; font: 500 14px/20px Arial, sans-serif; cursor: pointer; }
+.google-signin [role="button"] > div { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.google-signin svg { display: block; width: 20px !important; height: 20px !important; flex: 0 0 20px; }
+.google-signin .L6cTce { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .google-loading, .google-unavailable { color: var(--muted); font-size: 10px; }
 .google-loading::before { content: '> '; color: var(--accent); }
 .google-retry { color: var(--accent); font-size: 10px; margin-left: 10px; text-decoration: underline; text-underline-offset: 3px; }

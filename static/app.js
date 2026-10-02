@@ -86,6 +86,12 @@ function loadGoogleScript() {
   if (window.google?.accounts?.id) return Promise.resolve();
   if (googleScript) return googleScript;
   googleScript = new Promise((resolve, reject) => {
+    if (!document.querySelector('#google-button-styles')) {
+      const styles = document.createElement('link');
+      styles.id = 'google-button-styles'; styles.rel = 'stylesheet';
+      styles.href = 'https://accounts.google.com/gsi/style';
+      document.head.appendChild(styles);
+    }
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client'; script.async = true;
     const timeout = setTimeout(() => reject(new Error('Google sign-in was blocked or timed out. You can still use a private login below.')), 8000);
