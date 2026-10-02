@@ -65,8 +65,9 @@ def create_app(test_config=None):
         now = int(time.time())
         key = sha256(bucket.encode()).hexdigest()
         db().execute('DELETE FROM rate_limits WHERE expires<?', (now,))
+        counter = 'rate_limits.count+1' if db().is_postgres else 'count+1'
         db().execute('INSERT INTO rate_limits VALUES (?,1,?) ON CONFLICT(bucket) '
-                     'DO UPDATE SET count=count+1', (key, now + seconds))
+                     f'DO UPDATE SET count={counter}', (key, now + seconds))
         db().commit()
         return db().execute('SELECT count FROM rate_limits WHERE bucket=?', (key,)).fetchone()[0] > limit
 
