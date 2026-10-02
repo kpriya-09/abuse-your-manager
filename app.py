@@ -69,7 +69,8 @@ def create_app(test_config=None):
         db().execute('INSERT INTO rate_limits VALUES (?,1,?) ON CONFLICT(bucket) '
                      f'DO UPDATE SET count={counter}', (key, now + seconds))
         db().commit()
-        return db().execute('SELECT count FROM rate_limits WHERE bucket=?', (key,)).fetchone()[0] > limit
+        row = db().execute('SELECT count FROM rate_limits WHERE bucket=?', (key,)).fetchone()
+        return (row['count'] if db().is_postgres else row[0]) > limit
 
     @app.before_request
     def protect_writes():
