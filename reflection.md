@@ -41,3 +41,5 @@ Visual correction: muted olive still read as pastel despite terminal typography.
 Reference-led revision: the owner preferred an editorial grid-system example after seeing the full CLI palette. Preserve the reference's hierarchy and structural rhythm rather than its exact color; warm paper, black type, and vermilion provide an original expression. Treat the earlier terminal palette as superseded.
 
 Dark-theme correction: retain the reference's grid rhythm without literal vertical guide rails. Use vermilion as a controlled interaction and identity accent, rather than persistent lines framing the reading column.
+
+Auth feedback correction: a third-party sign-in script can be healthy in production yet look broken while loading or when a device blocks it. Always expose the loading state, bound the wait, name the likely failure, and preserve a first-party fallback.

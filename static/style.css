@@ -111,7 +111,9 @@ dialog textarea { min-height: 150px; resize: vertical; line-height: 1.8; }
 .form-note { font-size: 10px !important; margin: 0; }
 .switch-auth { color: var(--accent); font-size: 11px; margin-top: 20px; text-decoration: underline; text-underline-offset: 4px; }
 .google-signin { width: 100%; min-height: 44px; margin-top: 22px; display: flex; justify-content: center; overflow: hidden; }
-.google-unavailable { color: var(--muted); font-size: 10px; }
+.google-loading, .google-unavailable { color: var(--muted); font-size: 10px; }
+.google-loading::before { content: '> '; color: var(--accent); }
+.google-retry { color: var(--accent); font-size: 10px; margin-left: 10px; text-decoration: underline; text-underline-offset: 3px; }
 .auth-divider { display: flex; align-items: center; gap: 12px; margin: 19px 0 -8px; color: var(--muted); font-size: 9px; text-transform: uppercase; }
 .auth-divider::before, .auth-divider::after { content: ''; height: 1px; background: var(--line); flex: 1; }
 .modal-post-body { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px !important; }

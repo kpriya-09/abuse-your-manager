@@ -88,7 +88,9 @@ function loadGoogleScript() {
   googleScript = new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client'; script.async = true;
-    script.onload = resolve; script.onerror = () => reject(new Error('Google sign-in did not load.'));
+    const timeout = setTimeout(() => reject(new Error('Google sign-in was blocked or timed out. You can still use a private login below.')), 8000);
+    script.onload = () => { clearTimeout(timeout); resolve(); };
+    script.onerror = () => { clearTimeout(timeout); reject(new Error('Google sign-in was blocked. You can still use a private login below.')); };
     document.head.appendChild(script);
   });
   return googleScript;
@@ -96,6 +98,7 @@ function loadGoogleScript() {
 async function setupGoogleAuth() {
   const mount = $('#google-signin', modal);
   if (!mount) return;
+  mount.innerHTML = '<span class="google-loading">Loading Google sign-in…</span>';
   try {
     authProviders ||= await api('/auth/providers');
     if (!authProviders.google.enabled) { mount.hidden = true; $('.auth-divider', modal).hidden = true; return; }
@@ -103,8 +106,9 @@ async function setupGoogleAuth() {
     for (let i = 0; i < 20 && !window.google?.accounts?.id; i++) await new Promise(resolve => setTimeout(resolve, 100));
     if (!window.google?.accounts?.id) throw new Error('Google sign-in did not load.');
     google.accounts.id.initialize({client_id: authProviders.google.client_id, callback: handleGoogleCredential});
+    mount.replaceChildren();
     google.accounts.id.renderButton(mount, {theme: 'outline', size: 'large', shape: 'rectangular', width: Math.min(360, mount.clientWidth)});
-  } catch (error) { mount.innerHTML = `<span class="google-unavailable">${escapeHTML(error.message)}</span>`; }
+  } catch (error) { googleScript = null; mount.innerHTML = `<span class="google-unavailable">${escapeHTML(error.message)}</span><button type="button" class="google-retry">Retry Google</button>`; $('.google-retry', mount)?.addEventListener('click', setupGoogleAuth, {once:true}); }
 }
 async function handleGoogleCredential(result) {
   const errorBox = $('.form-error', modal);

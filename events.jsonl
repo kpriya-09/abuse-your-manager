@@ -17,3 +17,4 @@
 {"date":"2026-10-02","event":"palette.revised","changes":["near-black surfaces","phosphor-green interface","square controls","terminal mascot palette"],"human_approval":true}
 {"date":"2026-10-02","event":"visual_direction.revised","changes":["editorial grid layout","warm paper texture","vermilion accent","oversized display headlines"],"human_approval":true}
 {"date":"2026-10-02","event":"theme.darkened","changes":["charcoal editorial surfaces","matching vermilion mascot","removed vertical side rails"],"human_approval":true}
+{"date":"2026-10-02","event":"google_auth.investigated","evidence":["provider enabled","postgresql healthy","Google account chooser opened","no browser errors"],"changes":["visible loading state","eight-second timeout","retry action","private-login fallback"],"human_approval":true}
