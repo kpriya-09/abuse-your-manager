@@ -37,3 +37,5 @@ Mobile correction: `max-width` on the dialog did not prevent intrinsic grid/inpu
 Interaction correction: successful vote and reply mutations refetched and rebuilt the full feed or thread, creating reload-like flicker. Small mutations should update the local cache and affected controls immediately, persist asynchronously, and roll back on failure. Browser verification should assert DOM node identity, not only the final count.
 
 Visual correction: muted olive still read as pastel despite terminal typography. A CLI direction needs the palette, surface treatment, control geometry, and status colors to agree. The accepted working direction is near-black with phosphor green; use amber sparingly for state.
+
+Reference-led revision: the owner preferred an editorial grid-system example after seeing the full CLI palette. Preserve the reference's hierarchy and structural rhythm rather than its exact color; warm paper, black type, and vermilion provide an original expression. Treat the earlier terminal palette as superseded.

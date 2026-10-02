@@ -68,3 +68,7 @@ Votes and replies update the in-memory post cache and existing DOM immediately. 
 ## Full terminal palette
 
 The earlier muted olive treatment is superseded. The active UI now uses near-black surfaces, phosphor green text and borders, square controls, and a subtle scanline texture. Amber is reserved for errors, pending state, and the mascot's tie. IBM Plex Mono and the existing reading layout remain.
+
+## Editorial grid revision
+
+The phosphor terminal palette is superseded by the owner's grid-system reference. The interface now uses warm paper texture, black display headlines, vermilion structural lines, staggered feed blocks, and hard-edged controls. IBM Plex Mono remains for metadata and body copy, while headings use a heavy system sans face. The reference's blue was intentionally replaced with vermilion.
