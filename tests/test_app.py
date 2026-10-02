@@ -1,6 +1,7 @@
 import sqlite3
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 from app import create_app
 
@@ -32,6 +33,15 @@ class AppTests(unittest.TestCase):
         response = self.client.get('/api/health')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json, {'ok': True, 'database': 'sqlite'})
+
+    def test_vercel_without_database_fails_gracefully(self):
+        with patch.dict('os.environ', {'VERCEL': '1'}, clear=True):
+            app = create_app({'TESTING': True})
+        client = app.test_client()
+        self.assertEqual(client.get('/').status_code, 200)
+        health = client.get('/api/health')
+        self.assertEqual(health.status_code, 503)
+        self.assertEqual(health.json['error'], 'DATABASE_URL is not configured.')
 
     def test_public_read_authenticated_write_and_private_identity(self):
         with self.client.get('/') as home:

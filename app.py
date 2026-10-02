@@ -21,16 +21,19 @@ CATEGORIES = ('General', 'Manager mayhem', 'Meeting purgatory', 'Office politics
 
 def create_app(test_config=None):
     app = Flask(__name__, static_folder='static')
-    if os.getenv('VERCEL') and not os.getenv('DATABASE_URL'):
-        raise RuntimeError('DATABASE_URL is required on Vercel.')
-    app.config.update(DATABASE=os.getenv('DATABASE_URL', str(ROOT / 'instance' / 'aym.sqlite3')),
+    production_without_database = bool(os.getenv('VERCEL') and not os.getenv('DATABASE_URL'))
+    app.config.update(DATABASE=None if production_without_database else
+                      os.getenv('DATABASE_URL', str(ROOT / 'instance' / 'aym.sqlite3')),
                       MAX_CONTENT_LENGTH=20_000, SECURE_COOKIES=os.getenv('AYM_HTTPS') == '1',
                       SEED_DEMO=os.getenv('AYM_SEED_DEMO', '1') == '1')
     if test_config:
         app.config.update(test_config)
-    Path(app.config['DATABASE']).parent.mkdir(parents=True, exist_ok=True)
+    if app.config['DATABASE'] and not app.config['DATABASE'].startswith(('postgres://', 'postgresql://')):
+        Path(app.config['DATABASE']).parent.mkdir(parents=True, exist_ok=True)
 
     def db():
+        if not app.config['DATABASE']:
+            raise RuntimeError('DATABASE_URL is not configured for this deployment.')
         if 'db' not in g:
             g.db = Database(app.config['DATABASE'])
         return g.db
@@ -69,6 +72,8 @@ def create_app(test_config=None):
 
     @app.before_request
     def protect_writes():
+        if not app.config['DATABASE'] and request.path.startswith('/api/') and request.path != '/api/health':
+            return fail('The production database is not configured.', 503)
         if request.method in ('POST', 'DELETE', 'PATCH', 'PUT'):
             if request.headers.get('X-Requested-With') != 'AYM' or not request.is_json:
                 return fail('This action must come from the app.', 403)
@@ -137,7 +142,13 @@ def create_app(test_config=None):
 
     @app.get('/api/health')
     def health():
-        db().execute('SELECT 1').fetchone()
+        if not app.config['DATABASE']:
+            return jsonify(ok=False, error='DATABASE_URL is not configured.'), 503
+        try:
+            db().execute('SELECT 1').fetchone()
+        except Exception:
+            app.logger.exception('Database health check failed')
+            return jsonify(ok=False, error='Database connection failed.'), 503
         return jsonify(ok=True, database='postgresql' if db().is_postgres else 'sqlite')
 
     @app.post('/api/auth/<mode>')
@@ -346,7 +357,7 @@ def create_app(test_config=None):
         return jsonify(ok=True)
 
     app.config['DUMMY_HASH'] = generate_password_hash(secrets.token_urlsafe(32))
-    if not app.config['DATABASE'].startswith(('postgres://', 'postgresql://')):
+    if app.config['DATABASE'] and not app.config['DATABASE'].startswith(('postgres://', 'postgresql://')):
         with app.app_context():
             db().executescript((ROOT / 'schema.sql').read_text())
             db().execute('PRAGMA journal_mode=WAL')
