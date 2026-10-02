@@ -38,7 +38,9 @@ class AppTests(unittest.TestCase):
         with patch.dict('os.environ', {'VERCEL': '1'}, clear=True):
             app = create_app({'TESTING': True})
         client = app.test_client()
-        self.assertEqual(client.get('/').status_code, 200)
+        response = client.get('/')
+        self.assertEqual(response.status_code, 200)
+        response.close()
         health = client.get('/api/health')
         self.assertEqual(health.status_code, 503)
         self.assertEqual(health.json['error'], 'DATABASE_URL is not configured.')

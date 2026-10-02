@@ -8,6 +8,12 @@ Verified `https://abuse-your-manager.vercel.app` against managed PostgreSQL on 2
 
 Production uncovered two SQLite/PostgreSQL compatibility defects in the rate limiter: an ambiguous upsert expression and positional access on dictionary-shaped PostgreSQL rows. Both were corrected and the 16 local app tests pass after the fixes.
 
+### Mobile composer and Google auth preparation
+
+Reproduced the reported composer clipping at mobile size and verified the fix locally and at `https://abuseyourmanager.com` with a 390 × 844 viewport. The dialog and its form have no clipped right edge; headline, story, disclosure and full-width submit action remain visible. Production browser errors were empty and the verification session was signed out.
+
+Google sign-in has server-side ID-token validation coverage, stable subject-to-alias behavior, and profile-data minimization. The full suite now has 17 app tests; 105 repository tests and all six learning validations pass. The production providers endpoint currently reports Google disabled because `GOOGLE_CLIENT_ID` has not yet been configured; live Google consent/account selection is therefore not claimed as verified.
+
 ## Header search and popular threads revision
 
 Supersedes the dedicated Search tab layout below. Verified broad header search, immediate feed, removal of the decorative path/heading, and the coffee-mug SVG logo at 1440 x 1000 and 390 x 844. Partial-title query `MEET` returns the matching thread; Back to feed restores all five examples. Popular-thread links open the public detail dialog. Mobile has no horizontal overflow, and browser errors were empty. Screenshots refreshed.
